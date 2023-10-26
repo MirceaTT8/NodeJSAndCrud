@@ -3,6 +3,8 @@ const express = require('express'),
     bodyparser = require('body-parser');
 require('express-async-errors')
 
+const path = require('path')
+
 const db = require('./db'),
     employeeRoutes = require('./controllers/employee.controller')
 
@@ -15,6 +17,7 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).send('Something went wrong!')
 })
 
+app.use(express.static('public'))
 
 //first make sure db connection is successful
 //then start the express server.

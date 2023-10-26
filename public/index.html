@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Announcement Site</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+div {
+    margin: 20px;
+}
+
+form label {
+    display: block;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    margin: 5px 0;
+}
+
+button.delete, button.edit {
+    margin-left: 10px;
+}
+    </style>
+</head>
+<body>
+    <h1>Employee Announcement Site</h1>
+    <div>
+        <h2>Add Employee</h2>
+        <form id="addEmployeeForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="employee_code">Employee Code:</label>
+            <input type="text" id="employee_code" name="employee_code" required>
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" name="salary" required>
+            <button type="submit">Add Employee</button>
+        </form>
+        <div id="editNameForm" style="display: none;">
+            <label for="updatedName">Updated Name:</label>
+            <input type="text" id="updatedName">
+            <button id="updateNameButton">Update Name</button>
+        </div>
+    </div>
+    <div>
+        <h2>Employee List</h2>
+        <ul id="employeeList">
+            <!-- Employee list will be displayed here -->
+        </ul>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const addEmployeeForm = document.getElementById('addEmployeeForm');
+    const employeeList = document.getElementById('employeeList');
+
+    // Function to fetch and display the employee list
+    const refreshEmployeeList = async () => {
+        employeeList.innerHTML = ''; // Clear the list
+
+        // Fetch the employee data from your API (e.g., '/api/employees')
+        const response = await fetch('/api/employees');
+        const employees = await response.json();
+
+        employees.forEach(employee => {
+            const listItem = document.createElement('li');
+            listItem.textContent = employee.name;
+            listItem.innerHTML += ` <button data-id="${employee.id}" class="delete">Delete</button>`;
+            listItem.innerHTML += ` <button data-id="${employee.id}" class="edit">Edit</button>`;
+            employeeList.appendChild(listItem);
+
+            // Add event listeners for delete and edit buttons
+            listItem.querySelector('.delete').addEventListener('click', async (e) => {
+                const employeeId = e.target.getAttribute('data-id');
+                // Make an API request to delete the employee
+                await fetch(`/api/employees/${employeeId}`, { method: 'DELETE' });
+                refreshEmployeeList(); // Refresh the list after deletion
+            });
+
+                document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('edit')) {
+                const employeeId = e.target.getAttribute('data-id');
+                const employee = employees.find(emp => emp.id === parseInt(employeeId));
+                
+                if (employee) {
+                    const editNameForm = document.getElementById('editNameForm');
+                    const updatedNameInput = document.getElementById('updatedName');
+                    const updateNameButton = document.getElementById('updateNameButton');
+
+                    // Display the custom input form
+                    editNameForm.style.display = 'block';
+                    updatedNameInput.value = employee.name;
+
+                    // Handle the update action
+                    updateNameButton.onclick = async () => {
+                        const updatedName = updatedNameInput.value;
+                        editNameForm.style.display = 'none';
+
+                        // Make an API request to update the employee
+                        await fetch(`/api/employees/${employeeId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: updatedName,
+                                employee_code: employee.employee_code,
+                                salary: employee.salary
+                            })
+                        });
+                        refreshEmployeeList(); // Refresh the list after editing
+                    };
+                }
+            }
+        });
+        });
+    }
+
+    // Event listener for adding an employee
+     addEmployeeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const employee_code = document.getElementById('employee_code').value;
+        const salary = document.getElementById('salary').value;
+
+
+        // Make an API request to add a new employee
+        const response = await fetch('/api/employees', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, employee_code, salary }),
+        });
+
+        if (response.status === 201) {
+            // Employee added successfully
+            refreshEmployeeList(); // Refresh the list after adding
+        } else {
+            console.error('Error adding employee:', response.status);
+        }
+
+        addEmployeeForm.reset();
+    });
+    // Initial list load
+    refreshEmployeeList();
+});
+    </script>
+</body>
+</html>

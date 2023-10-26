@@ -1,7 +1,7 @@
 {
   "name": "nodejs-mysql-crud",
   "version": "1.0.0",
-  "description": "",
+  "description": "MySQL CRUD with Node.js API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +13,6 @@
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "mysql2": "^3.2.0"
-  }
+  },
+  "keywords": []
 }

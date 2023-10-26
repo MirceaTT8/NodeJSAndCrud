@@ -38,6 +38,4 @@ router.put('/:id', async (req, res) => {
         res.send('updated successfully.')
 })
 
-
-
 module.exports = router;
